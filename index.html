@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notícias Falsas Das Taipas ®</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Supabase JS (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <!-- Header (logo “no cabeçalho todo”) -->
+  <header class="masthead">
+    <div class="masthead-inner">
+      <img class="masthead-logo" src="NFT.jpeg" alt="Notícias Falsas Das Taipas" />
+      <div class="masthead-meta">
+        <div class="masthead-title">Notícias Falsas Das Taipas ®</div>
+        <div class="masthead-sub">por Tomé Caldelas</div>
+      </div>
+
+      <div class="masthead-actions">
+
+      <div id="adBox" class="ad-box"></div></div>
+
+      <div class="masthead-joke">
+        Jornalismo independente desde 1940 (independente da verdade).<br/>
+        Certificado por fontes imaginárias e testemunhas invisíveis.<br/>
+        Especialistas em “ouvi dizer” com pós-graduação em café local.
+      </div>
+
+        <button id="btnHome" class="btn ghost">Início</button>
+        <button id="btnAdmin" class="btn primary">Admin</button>
+      </div>
+    </div>
+
+    <div class="topline">
+      <div class="topline-left">
+        <span id="today"></span>
+        <span class="dot">•</span>
+        <span id="climateText">Clima: 23ºC, humidade de boato, vento de “ouvi dizer”.</span>
+      </div>
+      <nav class="sections">
+        <a href="#/" data-cat="Todas" class="nav-home">Últimas</a>
+        <a href="#/" data-cat="Taipas">Taipas</a>
+        <a href="#/" data-cat="Mundo">Mundo</a>
+        <a href="#/" data-cat="Desporto">Desporto</a>
+        <a href="#/" data-cat="Boatos Certificados">Boatos Certificados</a>
+      </nav>
+    </div>
+  <div class="header-ad" id="headerAd">Publicidade</div><div class="ticker"><span id="adTicker"></span></div></header>
+
+  <!-- Ticker -->
+  <div class="tickerbar">
+    <span id="breakingLabel" class="ticker-label">ÚLTIMA HORA</span>
+    <div class="ticker-viewport">
+      <div id="tickerText" class="ticker-text"></div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <!-- LEFT: content -->
+    <section class="left">
+      <!-- ROUTES -->
+      <div id="routeHome" class="route">
+        <div class="feed-head">
+          <h2 id="feedTitle">Últimas</h2>
+          <div class="feed-tools">
+            </div>
+        </div>
+
+        <div id="feed" class="feed"></div>
+        <div id="feedSentinel" aria-hidden="true"></div>
+      </div>
+
+      <div id="routeArticle" class="route hidden">
+        <article id="articleView" class="card article">
+          <div class="skeleton"></div>
+        </article>
+      </div>
+
+      <!-- Admin panel -->
+      
+<div id="routeAdmin" class="admin-drawer hidden" aria-hidden="true">
+  <div class="admin-drawer-inner">
+    <div class="admin-top">
+      <div class="admin-title">
+        <strong>CMS — Administração</strong>
+        <span class="muted" id="adminStatus">Modo admin</span>
+      </div>
+      <div class="admin-top-actions">
+        <button id="btnAdminClose" class="btn ghost">Fechar</button>
+        <button id="btnLogout" class="btn danger">Sair</button>
+      </div>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="tab active" data-tab="news">Notícias</button>
+      <button class="tab" data-tab="settings">Topo & Última Hora</button>
+      <button class="tab" data-tab="ads">Publicidade</button>
+      <button class="tab" data-tab="journalists">Jornalistas</button>
+      <button class="tab" data-tab="commentators">Comentadores</button>
+      <button class="tab" data-tab="comments">Comentários</button>
+      <button class="tab" data-tab="newsletter">Newsletter</button>
+    </div>
+
+    <div class="admin-panels">
+      <!-- NEWS -->
+      <section class="panel active" data-panel="news">
+        <h3>Notícias</h3>
+        <form id="newsForm" class="form">
+          <input id="newsId" type="hidden"/>
+          <label>Título
+            <input id="title" class="input" required placeholder="Título da notícia"/>
+          </label>
+          <label>Resumo (lead)
+            <textarea id="lead" class="input" placeholder="Resumo curto"></textarea>
+          </label>
+
+          <div class="row">
+            <label class="grow">Jornalista (assinatura)
+              <select id="journalistSelect" class="input"></select>
+            </label>
+            <label class="w220">Categoria
+              <select id="category" class="input">
+                <option>Todas</option>
+                <option>Taipas</option>
+                <option>Mundo</option>
+                <option>Desporto</option>
+                <option>Boatos Certificados</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Foto (alta qualidade)
+            <input id="imageFile" class="input" type="file" accept="image/*"/>
+            <span class="hint">A notícia é sempre: <strong>Título → Foto → Notícia</strong>.</span>
+          </label>
+
+          <label>Notícia
+            <textarea id="content" class="input" required placeholder="Texto completo"></textarea>
+          </label>
+
+          <label class="check">
+            <input id="isBreaking" type="checkbox"/> Marcar como Última Hora
+          </label>
+
+          <div class="row">
+            <button class="btn primary" type="submit">Guardar</button>
+            <button id="btnCancel" class="btn" type="button">Limpar</button>
+          </div>
+          <p id="newsMsg" class="msg"></p>
+        </form>
+
+        <hr class="sep"/>
+
+        <h4>Lista de notícias</h4>
+        <div id="adminNewsList" class="admin-list"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="panel" data-panel="settings">
+        <h3>Topo & Última Hora</h3>
+        <form id="settingsForm" class="form">
+          <label>Texto do Clima (topo)
+            <input id="setClimate" class="input" placeholder="Clima: ..."/>
+          </label>
+          <label>Rótulo 'Última Hora' (ticker)
+            <input id="setBreakingLabel" class="input" placeholder="ÚLTIMA HORA"/>
+          </label>
+          <label>Ticker manual (se preenchido, substitui as breaking)
+            <textarea id="setTickerOverride" class="input" placeholder="Texto do ticker..."></textarea>
+          </label>
+          <label>Texto 'Jornalista' (bio/descrição geral)
+            <textarea id="setJournalistIntro" class="input" placeholder="Texto sobre os jornalistas..."></textarea>
+          </label>
+          <label>Texto 'Comentador' (bio/descrição geral)
+            <textarea id="setCommentatorIntro" class="input" placeholder="Texto sobre os comentadores..."></textarea>
+          </label>
+          <div class="row">
+            <button class="btn primary" type="submit">Guardar</button>
+          </div>
+          <p id="settingsMsg" class="msg"></p>
+        </form>
+      </section>
+
+      <!-- ADS -->
+      <section class="panel" data-panel="ads">
+        <h3>Publicidade</h3>
+        <form id="adsForm" class="form">
+          <label>Texto da publicidade (passa na faixa animada)
+            <textarea id="setAdText" class="input" placeholder="Escreve aqui o texto da publicidade..."></textarea>
+          </label>
+          <button class="btn primary" type="submit">Guardar</button>
+          <div id="adsMsg" class="msg"></div>
+        </form>
+      </section>
+
+      <!-- JOURNALISTS -->
+      <section class="panel" data-panel="journalists">
+        <h3>Jornalistas</h3>
+        <div class="card" style="padding:12px;margin:12px 0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;">
+          <h4 style="margin:0 0 8px 0;">Texto “Jornalistas” (sidebar)</h4>
+          <textarea id="residentJournalistsEditor" class="input" style="min-height:220px;"></textarea>
+          <div class="row" style="margin-top:10px;">
+            <button id="btnSaveResidentJournalists" class="btn primary" type="button">Guardar Texto</button>
+          </div>
+          <p id="residentJournalistsMsg" class="msg"></p>
+        </div>
+
+        <form id="journalistForm" class="form">
+          <input id="journalistId" type="hidden"/>
+          <label>Nome
+            <input id="journalistName" class="input" required/>
+          </label>
+          <label>Texto/Bio
+            <textarea id="journalistBio" class="input"></textarea>
+          </label>
+          <label>Avatar (URL) — opcional
+            <input id="journalistAvatar" class="input" placeholder="https://..."/>
+          </label>
+          <label class="check">
+            <input id="journalistActive" type="checkbox" checked/> Ativo
+          </label>
+          <div class="row">
+            <button class="btn primary" type="submit">Guardar</button>
+            <button id="journalistCancel" class="btn" type="button">Limpar</button>
+          </div>
+          <p id="journalistMsg" class="msg"></p>
+        </form>
+
+        <div id="journalistsList" class="admin-list"></div>
+      </section>
+
+      <!-- COMMENTATORS -->
+      <section class="panel" data-panel="commentators">
+        <h3>Comentadores</h3>
+        <div class="card" style="padding:12px;margin:12px 0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;">
+          <h4 style="margin:0 0 8px 0;">Texto “Comentadores” (sidebar)</h4>
+          <textarea id="residentCommentatorsEditor" class="input" style="min-height:220px;"></textarea>
+          <div class="row" style="margin-top:10px;">
+            <button id="btnSaveResidentCommentators" class="btn primary" type="button">Guardar Texto</button>
+          </div>
+          <p id="residentCommentatorsMsg" class="msg"></p>
+        </div>
+
+        <form id="commentatorForm" class="form">
+          <input id="commentatorId" type="hidden"/>
+          <label>Nome
+            <input id="commentatorName" class="input" required/>
+          </label>
+          <label>Texto/Bio
+            <textarea id="commentatorBio" class="input"></textarea>
+          </label>
+          <label>Avatar (URL) — opcional
+            <input id="commentatorAvatar" class="input" placeholder="https://..."/>
+          </label>
+          <label class="check">
+            <input id="commentatorActive" type="checkbox" checked/> Ativo
+          </label>
+          <div class="row">
+            <button class="btn primary" type="submit">Guardar</button>
+            <button id="commentatorCancel" class="btn" type="button">Limpar</button>
+          </div>
+          <p id="commentatorMsg" class="msg"></p>
+        </form>
+
+        <div id="commentatorsList" class="admin-list"></div>
+      </section>
+
+      <!-- COMMENTS MODERATION -->
+      <section class="panel" data-panel="comments">
+        <h3>Moderação de comentários</h3>
+        <div class="row">
+          <input id="modSearch" class="input grow" placeholder="Procurar por texto ou autor..."/>
+          <button id="modRefresh" class="btn" type="button">Atualizar</button>
+        </div>
+        <div id="modCommentsList" class="admin-list"></div>
+        <p class="hint">*Ao apagar um comentário pai, as respostas são apagadas automaticamente.</p>
+      </section>
+
+      <!-- NEWSLETTER -->
+      <section class="panel" data-panel="newsletter">
+        <h3>Newsletter</h3>
+        <form id="newsletterTemplateForm" class="form">
+          <label>Assunto do email automático
+            <input id="nlSubject" class="input" placeholder="Bem-vindo(a) ..."/>
+          </label>
+          <label>Mensagem do email automático
+            <textarea id="nlBody" class="input" placeholder="Texto que as pessoas vão receber..."></textarea>
+          </label>
+          <div class="row">
+            <button class="btn primary" type="submit">Guardar</button>
+          </div>
+          <p id="nlMsg" class="msg"></p>
+        </form>
+        <hr class="sep"/>
+        <h4>Subscrições</h4>
+        <button id="btnLoadSubs" class="btn ghost" type="button">Carregar emails</button>
+        <div id="subsList" class="admin-list"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+    </section>
+
+    <!-- RIGHT: sidebar -->
+    <aside class="right">
+      
+      <section class="card widget">
+        <h2>Jornalistas:</h2>
+        <div id="residentJournalistsText" class="resident-text"></div>
+      </section>
+
+
+      
+      <section class="card widget">
+        <h2>Comentadores:</h2>
+        <div id="residentCommentatorsText" class="resident-text"></div>
+      </section>
+
+
+      <section class="card widget">
+        <h2>Nota editorial</h2>
+        <p>
+          Este é um site <strong>satírico/humorístico</strong>. Personagens e acontecimentos são <strong>fictícios</strong>.
+          Qualquer parecença com pessoas reais é pura coincidência.
+        </p>
+      </section>
+
+      <section class="card widget">
+        <h2>Newsletter</h2>
+        <p>Recebe as “notícias” antes de toda a gente (e arrepende-te em privado).</p>
+        <div class="row">
+          <input id="newsletterEmail" class="input grow" placeholder="email@exemplo.pt" />
+          <button id="newsletterBtn" class="btn">Subscrever</button>
+        </div>
+        <p class="hint">*Esta subscrição é tão real quanto as nossas fontes.</p>
+        <p id="newsletterMsg" class="msg"></p>
+      </section>
+    </aside>
+  </main>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Autenticação">
+    <div class="modal-card">
+      <button id="authClose" class="x" aria-label="Fechar">✕</button>
+      <h2>Login Admin</h2>
+      <p class="hint"></p>
+
+      <form id="authForm" class="form">
+        <label>Email
+          <input id="authEmail" class="input" type="email" autocomplete="username" required />
+        </label>
+        <label>Password
+          <input id="authPass" class="input" type="password" autocomplete="current-password" required />
+        </label>
+        <div class="row">
+          <button class="btn primary grow" type="submit">Entrar</button>
+          </div>
+        <p id="authMsg" class="msg"></p>
+      </form>
+
+      <details class="hint">
+        <summary></summary>
+        <ol>
+          <li>Em Supabase: Authentication → Providers → Email (ativar).</li>
+          <li>Criar bucket Storage: <code>news-images</code> (Public).</li>
+          <li>Criar tabela <code>news</code> (ver SQL no topo do <code>app.js</code>).</li>
+          <li>No <code>app.js</code>: colocar <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code>.</li>
+        </ol>
+      </details>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <strong>NFT — Notícias Falsas Das Taipas</strong><br/>
+        Portal satírico com rigor zero e entusiasmo máximo.
+      </div>
+      <div class="muted">
+        © <span id="year"></span> — Qualquer semelhança com a realidade é “puta coincidência”.
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
